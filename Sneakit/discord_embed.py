@@ -61,22 +61,9 @@ async def on_message(message):
           name="Prices:",
           value=sneakit_sizes_output
         )
-        embed.set_footer(
-          text="Developed by Jakob.AIO"
-        )
         embed.add_field(
-          name='StockX',
-          value=f"[Open Product on StockX]({stockx_url_output})",
-          inline=False
-        )
-        embed.add_field(
-          name="Restocks",
-          value=f"[Open Product on Restocks]({restocks_url_output})",
-          inline=False
-        )
-        embed.add_field(
-          name="Hypeboost",
-          value=f"[Open Product on Hypeboost]({hypeboost_url_output})",
+          name="Open Product on:",
+          value=f"[[StockX]     ]({stockx_url_output})" f"[[Hypeboost]     ]({hypeboost_url_output})" f"[[Restocks]     ]({restocks_url_output})",
           inline=False
         )
         embed.set_footer(
