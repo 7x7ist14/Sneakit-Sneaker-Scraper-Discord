@@ -36,7 +36,8 @@ def sneakit_sizes(SKU):
   for entry in sorted(result, key=lambda x: x['size']):
     output_str += f"{entry['size']}: {entry['shop_price_in_eur']}€\n"
   print("Scraped Sneakit Prices & Sizes!")
-  return output_str
+  output_str2 = output_str.replace('.5', '½')
+  return output_str2
 
 def sneakit_image(SKU):
   raw = sneakit_info(SKU)
