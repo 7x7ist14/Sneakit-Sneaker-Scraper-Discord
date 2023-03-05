@@ -35,7 +35,6 @@ async def on_message(message):
 
     if f'$sneakit' in message_content:
         SKU = message_content.replace('$sneakit ', '')
-        sneakit_product_output = sneakit_product(SKU)
         sneakit_product_img_output = sneakit_product_img(SKU)
         sneakit_sizes_output = sneakit_sizes(SKU)
         sneakit_product_title_output = sneakit_product_title(SKU)
