@@ -16,7 +16,7 @@ The scraper will return a message in your Discord chanel with a list of all size
 
 # How to use
 
-1. Open the "Config" file and input your Discord Bot Token.
+1. Open the "Config" file and input your Discord Bot Token and the name of the channel where you want to use the scraper in.
 
 2. Open and run the "discord_embed" file. (best for this is VS-Code in my opinion)
 
