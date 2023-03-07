@@ -1,109 +1,83 @@
-import requests
-import json
-from bs4 import BeautifulSoup
+import discord
+import config
+import Scraper_Main
+from config import TOKEN, CHANNEL_NAME
+from discord.ext import commands
+from Scraper_Main import product_url
+from Scraper_Main import product_title
+from Scraper_Main import product_picture
+from Scraper_Main import stockx_url
+from Scraper_Main import restocks_url
 
-def sneakit_url(SKU):
-  produkt_code = SKU
-  global url
-  url = f"https://sneakit.com/search/products/{produkt_code}?query={produkt_code}&page=1"
-  print("Scraped Sneakit URL!", url)
-  return url
+if not TOKEN:
+    raise ValueError("The BOt-Token was not included in the config.py file")
 
-def sneakit_product_url(SKU):
-  raw = sneakit_info(SKU)
-  slug = raw['data'][0]['slug']
-  p_url = "https://sneakit.com/product/" + slug
-  print("Scraped Sneakit Product URL:" + p_url)
-  return p_url
+if not CHANNEL_NAME:
+    raise ValueError("The Channel-name was not included in the config.py file")
 
 
-def sneakit_info(SKU):
-  sneakit_url_r = sneakit_url(SKU)
-  r = requests.get(sneakit_url_r)
-  global output
-  output = json.loads(r.text)
-  print("Scraped Sneakit info!")
-  return output
+hypeboost_preise = Scraper_Main.product_search
+product_url = Scraper_Main.product_url
+product_title = Scraper_Main.product_title
+product_picture = Scraper_Main.product_picture
+stockx_url = Scraper_Main.stockx_url
+restocks_url = Scraper_Main.restocks_url
+sneakit_url = Scraper_Main.sneakit_product_url
 
-def sneakit_sizes(SKU):
-  raw = sneakit_info(SKU)
-  sizes = raw['data'][0]['product_variants_with_shop_price']
-  result = []
-  for entry in sizes:
-    result.append({'size': entry['size'], 'shop_price_in_eur': entry['shop_price_in_eur']})
-  result = sorted(result, key=lambda x: x['size'])
-  output_str = ''
-  for entry in sorted(result, key=lambda x: x['size']):
-    output_str += f"{entry['size']}: {entry['shop_price_in_eur']}€\n"
-  print("Scraped Sneakit Prices & Sizes!")
-  output_str2 = output_str.replace('.5', '½')
-  return output_str2
+bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 
-def sneakit_image(SKU):
-  raw = sneakit_info(SKU)
-  image = raw['data'][0]['productable']['preview_img_public_url']
-  #print(image)
-  print("Scraped Image!")
-  return image
+@bot.event
+async def on_ready():
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game('Scraping!'))
+    print("Bot logged in!")
 
-def sneakit_title(SKU):
-  raw = sneakit_info(SKU)
-  title = raw['data'][0]['name']
-  print("Scraped Sneakit Title!")
-  return title
 
-def stockx_url(SKU):
-  url = "https://stockx.com/api/browse?_search=" + SKU
+@bot.event
+async def on_message(message):
+  if message.author == bot.user:
+      return
+  message_content = message.content.lower()
 
-  headers = {
-          'accept': 'application/json',
-          'accept-encoding': 'utf-8',
-          'accept-language': 'en-DE',
-          'app-platform': 'Iron',
-          'referer': 'https://stockx.com/en-DE',
-          'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="102", "Google Chrome";v="102"',
-          'sec-ch-ua-mobile': '?0',
-          'sec-ch-ua-platform': '"Windows"',
-          'sec-fetch-dest': 'empty',
-          'sec-fetch-mode': 'cors',
-          'sec-fetch-site': 'same-origin',
-          'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-          'x-requested-with': 'XMLHttpRequest'
-      }
+  if message.channel.name == CHANNEL_NAME:
+    if message.content.startswith(f'$scrape'): #(Prefix "§") keyword for scraping
+      await message.channel.send("Scraping...")
 
-  request1 = requests.get(url=url, headers=headers)
+      if f'$scrape' in message_content:
+          SKU = message_content.replace('$scrape ', '') # everything after prefix is the search (SKU)
+          hypeboost_sizes = hypeboost_preise(SKU) #SKU used for scraping
+          product_url_output = product_url(SKU)
+          product_title_output = product_title(product_url_output)
+          product_picture_output = product_picture(product_url_output)
+          stockx_url_output = stockx_url(SKU)
+          restocks_url_output = restocks_url(SKU)
+          sneakit_url_output = sneakit_url(SKU)
+          embed = discord.Embed(
+            title=product_title_output,
+            url=product_url_output,
+            color=0x1abc9c
+          )
+          embed.set_author(
+            name="HypeBoost Scraper",
+            url="https://twitter.com/jakobaio",
+            icon_url= "https://consumersiteimages.trustpilot.net/business-units/610a587f2b259a001d8d9b5f-198x149-1x.jpg"
+            )
+          embed.set_thumbnail(
+            url=product_picture_output
+          )
+          embed.add_field(
+            name="Prices:",
+            value=hypeboost_sizes
+          )
+          embed.add_field(
+            name="Open Product on:",
+            value=f"[[StockX]]({stockx_url_output})      " f"[[Sneakit]]({sneakit_url_output})      " f"[[Restocks]]({restocks_url_output})      " f"[[Hypeboost]]({product_url_output})      ",
+            inline=False
+          )
+          embed.set_footer(
+            text="Developed by Jakob.AIO"
+          )
+          await message.channel.send(embed=embed) #sends sizes in discord chat
+          print('Scraping Successful!')
 
-  product_id = json.loads(request1.text)
-  product_id_final = product_id['Products'][0]['id']
 
-  ID = product_id_final
-  url_stockX = "https://stockx.com/" + ID
-  print("Scraped StockX URL: " + url_stockX)
-  return url_stockX
-
-def restocks_url(SKU):
-  base_url = 'https://restocks.net/de/shop/search?q='
-  request_url = base_url + SKU + '&page=1&filters[0][range][price][gte]=1'
-
-  r = requests.get(request_url)
-
-  json_restocks = json.loads(r.text)
-  product_url = json_restocks["data"][0]['slug']
-  print('Scraped Restocks URL: ' + product_url)
-  return product_url
-
-def product_url(SKU):
-  url = "https://hypeboost.com/en/search/shop?keyword=" + SKU
-
-  headers = {
-      "cookie": "country=eyJpdiI6ImlCRDJaRExPQkZYNTNlMmM0OWFEQVE9PSIsInZhbHVlIjoiTFRaRW01UW5wNUY2RjZnQzViWGlPYWRtYVRmbmxxMXpoRjNzODlZZUdIZmNLWjZSTFp0Q3htbTFuYUF4ZGkwVSIsIm1hYyI6IjQ0MzBlZTdkZmNhYjVhYmJhMDAzNDhlNjQ3MGU5NzQ1YThkOTk0ZDRkNzYxZGQzYzg0ODI0ZWYzZWZhODBlZGYiLCJ0YWciOiIifQ%253D%253D; currency=eyJpdiI6ImFlbkxaNHJyOHdUZlJFRlJ2dGlna0E9PSIsInZhbHVlIjoieEx2OE01VHhzOGZ1eFdsM09IVDFIZmR6R1hieHpDRDZScWoweVhqTDZjUzY2a3FFUmhQZGdPV2piaFN3OTViTCIsIm1hYyI6IjgzMTY0NDExNzljYjM1MzFmZmM5ZTBhOGY0MjU3ZWViMjA2NjBjYmUwMjg0MDFkMmUyYmJiNTVjYTUxZTk5MjMiLCJ0YWciOiIifQ%253D%253D",
-      "Content-Type": "application/json"
-  }
-
-  response = requests.request("GET", url, headers=headers)
-
-  soup = BeautifulSoup(response.content, 'html.parser')
-
-  for a in soup.find_all('a', href=True):
-    print('Scraped product url!')
-    return a['href']
+bot.run(TOKEN)
