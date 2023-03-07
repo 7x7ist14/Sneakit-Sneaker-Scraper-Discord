@@ -31,4 +31,4 @@ At the bottom of the discord message you can also find the StockX, Hypeboost and
 # Return Message Example:
 The return message looks like this:
 
-![image](https://user-images.githubusercontent.com/103487648/222970807-df067516-e460-46d6-81df-a7c657f5ad0a.png)
+![image](https://user-images.githubusercontent.com/103487648/223550391-0efddfad-55cf-4c9a-a0fc-084ac038e819.png)
