@@ -1,8 +1,7 @@
 import discord
 import sneakit
-import config
 from discord.ext import commands
-from config import TOKEN
+from config import TOKEN, CHANNEL_NAME
 
 sneakit_product = sneakit.sneakit_url
 sneakit_sizes = sneakit.sneakit_sizes
@@ -15,6 +14,9 @@ hypeboost_url = sneakit.product_url
 
 if not TOKEN:
     raise ValueError("The BOt-Token was not included in the config.py file")
+
+if not CHANNEL_NAME:
+    raise ValueError("The Channel-name was not included in the config.py file")
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 
@@ -30,47 +32,51 @@ async def on_message(message):
       return
   message_content = message.content.lower()
 
-  if message.content.startswith(f'$sneakit'):
-    await message.channel.send("Scraping!")
+  if message.channel.name == CHANNEL_NAME:
+    if message.content.startswith(f'$sneakit'):
+      await message.channel.send("Scraping...")
 
-    if f'$sneakit' in message_content:
-        SKU = message_content.replace('$sneakit ', '')
-        sneakit_product_img_output = sneakit_product_img(SKU)
-        sneakit_sizes_output = sneakit_sizes(SKU)
-        sneakit_product_title_output = sneakit_product_title(SKU)
-        stockx_url_output = stockx_url(SKU)
-        restocks_url_output = restocks_url(SKU)
-        hypeboost_url_output = hypeboost_url(SKU)
-        sneakit_product_url_output = sneakit_product_url(SKU)
+      if f'$sneakit' in message_content:
+          SKU = message_content.replace('$sneakit ', '')
+          sneakit_product_img_output = sneakit_product_img(SKU)
+          sneakit_sizes_output = sneakit_sizes(SKU)
+          sneakit_product_title_output = sneakit_product_title(SKU)
+          stockx_url_output = stockx_url(SKU)
+          restocks_url_output = restocks_url(SKU)
+          hypeboost_url_output = hypeboost_url(SKU)
+          sneakit_product_url_output = sneakit_product_url(SKU)
 
-        embed = discord.Embed(
-          title=sneakit_product_title_output,
-          url=sneakit_product_url_output,
-          color=0x607d8b
-        )
-        embed.set_author(
-          name="Sneakit Scraper",
-          url="https://twitter.com/jakobaio",
-          icon_url= "https://consumersiteimages.trustpilot.net/business-units/630e4bd7744ce9c5e2e2fc4e-198x149-1x.jpg"
+          embed = discord.Embed(
+            title=sneakit_product_title_output,
+            url=sneakit_product_url_output,
+            color=0x607d8b
           )
-        embed.set_thumbnail(
-          url=sneakit_product_img_output
-        )
-        embed.add_field(
-          name="Prices:",
-          value=sneakit_sizes_output
-        )
-        embed.add_field(
-          name="Open Product on:",
-          value=f"[[StockX]     ]({stockx_url_output})" f"[[Hypeboost]     ]({hypeboost_url_output})" f"[[Restocks]     ]({restocks_url_output})",
-          inline=False
-        )
-        embed.set_footer(
-          text="Developed by Jakob.AIO"
-        )
+          embed.set_author(
+            name="Sneakit Scraper",
+            url="https://twitter.com/jakobaio",
+            icon_url= "https://consumersiteimages.trustpilot.net/business-units/630e4bd7744ce9c5e2e2fc4e-198x149-1x.jpg"
+            )
+          embed.set_thumbnail(
+            url=sneakit_product_img_output
+          )
+          embed.add_field(
+            name="Prices:",
+            value=sneakit_sizes_output
+          )
+          embed.set_footer(
+            text="Developed by Jakob.AIO"
+          )
+          embed.add_field(
+            name="Open Product on:",
+            value=f"[[StockX]]({stockx_url_output})      " f"[[Sneakit]]({sneakit_product_url_output})      " f"[[Restocks]]({restocks_url_output})      " f"[[Hypeboost]]({hypeboost_url_output})      ",
+            inline=False
+          )
+          embed.set_footer(
+            text="Developed by Jakob.AIO"
+          )
 
-        await message.channel.send(embed=embed)
-        print('Scraping Successful!')
+          await message.channel.send(embed=embed)
+          print('Scraping Successful!')
 
 
 bot.run(TOKEN)
