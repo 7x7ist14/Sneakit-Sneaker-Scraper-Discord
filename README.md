@@ -22,13 +22,18 @@ The scraper will return a message in your Discord chanel with a list of all size
 
 3. Write the keyword ($sneakit) + SKU in your discord server.
    format: $sneakit SKU --> (example: $sneakit CW1590-100)
+   --> you can also change the command and the prefix in the config file if you want to.
 
 
 The Scraper will now send you all listed sizes and their prices in the discord channel.
 Also the Sneakit product URL is in the blue title.
-At the bottom of the discord message you can also find the StockX, Hypeboost and Restocks Product URL to the Scraped Product.
+At the bottom of the discord message you can also find the StockX, Sneakit, GOAT, Hypeboost and Restocks Product URL to the Scraped Product.
 
 # Return Message Example:
 The return message looks like this:
 
-![image](https://user-images.githubusercontent.com/103487648/223550391-0efddfad-55cf-4c9a-a0fc-084ac038e819.png)
+![image](https://user-images.githubusercontent.com/103487648/224495962-bd130f4c-3427-4e55-9022-8a0c317d4cd6.png)
+
+
+![image](https://user-images.githubusercontent.com/103487648/224495997-3544498c-9e55-4b8c-9dfb-321f879c1b6c.png)
+
