@@ -85,5 +85,7 @@ async def on_message(message):
           await message.channel.send(embed=embed)
           print('Scraping Successful!')
 
+    else:
+      await message.channel.send("***wrong command used!***")
 
 bot.run(TOKEN)
